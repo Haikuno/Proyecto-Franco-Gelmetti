@@ -1,76 +1,80 @@
-#Cosas para correr el programa:
-# Python
-# Pandas datatable
-# Openpyxl
-
-# pip install openpyxl
-# pip install pandas
 import pandas as pd
 
-df = pd.read_excel('gelme.xlsx') # Guardar en DataFrame el input
-df = df.sort_values(["Demanda"], ascending=False) # Sortear por demanda
+df_productos = pd.read_excel('productos.xlsx') # Guardar en DataFrame el input de productos
+df_productos = df_productos.sort_values(["Demanda"], ascending=False) # Sortear por demanda
 
+df_lista = pd.read_excel('lista.xlsx') # Lista de ubicaciones
+
+ids_conocidos = []
+modulos = []
 productos = []
-
-
-class estacion():
-    ubicacion = 0
-    capacidad = 0
-    cont = 0
-    def __init__(self, ubicacion, capacidad, cont):
-        self.ubicacion = ubicacion
-        self.capacidad = capacidad
-        self.cont = cont
+ubicaciones = []
+output = []
 
 class producto():
-    nombre = ""
-    demanda = 0
-    automatizable = False
-    canales = 0
-    def __init__(self, nombre, demanda, automatizable, canales):
+    def __init__(self, nombre, demanda, automatizable, canales, categoria):
         self.nombre = nombre
         self.demanda = demanda
         self.automatizable = automatizable
         self.canales = canales
+        self.categoria = categoria
 
-estacion0 = estacion(3100000, 108, 0)
-estacion1 = estacion(3200000, 108, 0)
-estacion2 = estacion(3300000, 108, 0)
-estacion3 = estacion(3400000, 108, 0)
-estacion4 = estacion(2100000, 108, 0)
-estacion5 = estacion(2200000, 108, 0)
-estacion6 = estacion(2300000, 108, 0)
-estacion7 = estacion(1100000, 144, 0)
+class modulo():
+    def __init__(self, id, ubicacion):
+        self.ubicaciones_modulo = [ubicacion]
+        self.categoria = "None"
+        self.id = id
 
-estaciones = [estacion0, estacion1, estacion2, estacion3, estacion4, estacion5, estacion6, estacion7]
+#--------------------------------------------------------------------------------#
 
-for row in df.itertuples():
-    productos.append(producto(row[1], row[2], row[3], row[4])) #
+for row in df_productos.itertuples():
+    productos.append(producto(row[1], row[2], row[3], row[4], row[5]))
 
+for row in df_lista.itertuples():
+    ubicaciones.append(str(row[1]))
+    if row[0] > 900:
+        ubi = row[1] # Ubicación actual
+        id = str(ubi)
+        id = id[:5]
 
-output = []
+        if id not in ids_conocidos:
+            modulos.append(modulo(id, ubi))
+            ids_conocidos.append(id)
 
-maxub=0 # Máximo de ubicaciones
+        else:
+            for m in modulos:
+                if m.id == id:
+                    m.ubicaciones_modulo.append(ubi)
+                    break;
 
-estacionlibre = estacion0
+#--------------------------------------------------------------------------------#
+
+currentub = 0 # Ubicaciones actualmente ocupadas
 
 for prod in productos:
-    if prod.automatizable and maxub<900:
+
+    if prod.automatizable and currentub<900: # Si es automatizable y no estan ocupadas todas las ubicaciones automaticas
         for i in range(prod.canales):
-            estacionlibre.cont += 1
-            output.append({'Nombre': prod.nombre, 'Ubicación': estacionlibre.ubicacion, 'Demanda': prod.demanda})
-            estacionlibre.ubicacion += 1
-            maxub +=1
-        for estacion in estaciones:
-            if estacion.cont < estacionlibre.cont and estacion.cont + prod.canales < estacion.capacidad:
-                estacionlibre = estacion
+            output.append({'Nombre': prod.nombre, 'Ubicación': ubicaciones[currentub], 'Demanda': prod.demanda, 'Categoria': prod.categoria})
+            currentub +=1
+
+    else:
+        for m in modulos:
+            if prod.canales == 0:
+                break;
+            elif m.categoria == "None" or m.categoria == prod.categoria:
+                m.categoria = prod.categoria
+                n = prod.canales
+                for i in range(n):
+                    if len(m.ubicaciones_modulo) != 0:
+                        output.append({'Nombre': prod.nombre, 'Ubicación': m.ubicaciones_modulo[0], 'Demanda': prod.demanda, 'Categoria': prod.categoria})
+                        m.ubicaciones_modulo.remove(m.ubicaciones_modulo[0])
+                        prod.canales -= 1
+
+#--------------------------------------------------------------------------------#
 
 output = pd.DataFrame(output)
 
 #TODO:cambiar pathing dependiendo de pc
-output.to_excel(r'/home/agu/code/proyecto/Output.xlsx', index = False) # Archivo final
 
-#8 estaciones
-# 7 de 108 ubicaciones
-# 1 de 144 ubicaciones
-# 900 ubicaciones
+output.to_excel(r'/home/agu/Code/Proyecto-Franco-Gelmetti/Output.xlsx', index = False) # Archivo final
