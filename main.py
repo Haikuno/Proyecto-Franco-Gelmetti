@@ -1,112 +1,79 @@
 import pandas as pd
 
-df_productos = pd.read_excel('productos.xlsx') # Guardar en DataFrame el input de productos
-df_productos = df_productos.sort_values(["Demanda"], ascending=False) # Sortear por demanda
+df_productos = pd.read_excel('listagordo.xlsx') # Guardar en DataFrame el input de productos
+df_productos = df_productos.sort_values(["Demanda"], ascending=False) # Sortear por demanda por las dudas
 
-df_lista = pd.read_excel('lista.xlsx') # Lista de ubicaciones
+df_lista = pd.read_excel('listaprio.xlsx') # Lista de ubicaciones
+df_lista = df_lista.sort_values(["Prioridad"], ascending=True)
 
-ids_conocidos = []
-modulos = []
+class Producto():
+    def __init__(self, nombre, categoria, automatizable):
+        self.nombre = nombre
+        self.categoria = categoria
+        self.automatizable = automatizable
+    ubicacion = None
+    prioridad = None
+
+class Ubicacion():
+    def __init__(self, id, modulo, prioridad, automatizable):
+        self.id = id
+        self.modulo = modulo
+        self.prioridad = prioridad
+        self.automatizable = automatizable
+class Modulo():
+    def __init__(self, id):
+        self.id = id
+    categoria = None
+
+
 productos = []
 ubicaciones = []
+modulos = []
+modulos_ocupados = [] # ID
 output = []
 
-class producto():
-    def __init__(self, nombre, demanda, automatizable, canales, categoria):
-        self.nombre = nombre
-        self.demanda = demanda
-        self.automatizable = automatizable
-        self.canales = canales
-        self.categoria = categoria
-
-class modulo():
-    def __init__(self, id, ubicacion):
-        self.ubicaciones_modulo = [ubicacion]
-        self.categoria = "None"
-        self.id = id
-
-#--------------------------------------------------------------------------------#
-
 for row in df_productos.itertuples():
-    productos.append(producto(row[1], row[2], row[3], row[4], row[5]))
+    productos.append(Producto(row.Nombre, row.Categoría, row.Automatizable))
 
 for row in df_lista.itertuples():
-    ubi = str(row[1])
-    if len(ubi) == 6:
-            ubi = "0" + ubi
-    ubicaciones.append(ubi)
-    if row[0] > 900: # Ubicación actual
-        id = ubi[:5]
+    if str(row.Ubicación).startswith('A'):
+        ubicaciones.append(Ubicacion(row.Ubicación, row.Módulo, row.Prioridad, True))
+    else:
+        ubicaciones.append(Ubicacion(row.Ubicación, row.Módulo, row.Prioridad, False))
 
-        if id not in ids_conocidos:
-            modulos.append(modulo(id, ubi))
-            ids_conocidos.append(id)
+    modulo = Modulo(row.Módulo)
+    if len(modulos) == 0:
+        modulos.append(modulo)
 
-        else:
-            for m in modulos:
-                if m.id == id:
-                    m.ubicaciones_modulo.append(ubi)
-                    break;
+    if modulo.id not in modulos_ocupados:
+        modulos.append(modulo)
+        modulos_ocupados.append(modulo.id)
 
-#--------------------------------------------------------------------------------#
+for producto in productos:
 
-currentub = 0 # Ubicaciones actualmente ocupadas
-lleno = False
+    for ubicacion in ubicaciones:
+        if producto.ubicacion is not None:
+            break
+        for modulo in modulos:
+            if ubicacion.modulo == modulo.id:
+                if producto.automatizable == False:
+                    if ubicacion.automatizable == True:
+                        continue
+                if modulo.categoria is None or modulo.categoria == producto.categoria:
+                    modulo.categoria = producto.categoria
+                    producto.ubicacion = ubicacion.id
+                    producto.prioridad = ubicacion.prioridad
+                    del(ubicaciones[ubicaciones.index(ubicacion)])
+                    break
 
-
-while not lleno:
-
-    lleno = True
-
-    for prod in productos:
-
-        if prod.automatizable and currentub<=900: # Si es automatizable y no estan ocupadas todas las ubicaciones automaticas
-            for i in range(prod.canales):
-                output.append(
-                    {'Nombre': prod.nombre,
-                    'Ubicación': ubicaciones[currentub],
-                    'Demanda': prod.demanda,
-                    'Categoria': prod.categoria})
-                currentub +=1
-                productos.remove(prod)
-
-        else:
-            for i in range(prod.canales):
-                for m in modulos:
-                    if ubicaciones[currentub] in m.ubicaciones_modulo:
-                        if m.categoria == "None" or m.categoria == prod.categoria:
-                            m.categoria = prod.categoria
-                            output.append(
-                            {'Nombre': prod.nombre,
-                            'Ubicación': ubicaciones[currentub],
-                            'Demanda': prod.demanda,
-                            'Categoria': prod.categoria})
-                            currentub +=1
-                            productos.remove(prod)
-                            lleno = False
-                            break
-                        # elif ubicaciones[currentub] not in output:
-                        #     output.append(
-                        #     {'Nombre': " ",
-                        #     'Ubicación': ubicaciones[currentub],
-                        #     'Demanda': " ",
-                        #     'Categoria': " "})
-                        #     break
-
-if lleno:
-    output.append(
-    {'Nombre': "Basura",
-    'Ubicación': "Basura",
-    'Demanda': "Basura",
-    'Categoria': "Basura"})
-    for prod in productos:
-        output.append(
-        {'Nombre': prod.nombre,
-        'Ubicación': " ",
-        'Demanda': prod.demanda,
-        'Categoria': prod.categoria})
-
-
+for producto in productos:
+    output.append({
+        'Nombre': producto.nombre,
+        'Ubicación': producto.ubicacion,
+        'Categoria': producto.categoria,
+        'prio en top': producto.prioridad,
+        'Automatizable' : producto.automatizable,
+        })
 
 #--------------------------------------------------------------------------------#
 
@@ -114,4 +81,4 @@ output = pd.DataFrame(output)
 
 #TODO:cambiar pathing dependiendo de pc
 
-output.to_excel(r'/home/agu/Code/Proyecto-Franco-Gelmetti/Output.xlsx', index = False) # Archivo final
+output.to_excel(r'/home/agu/Code/gelme/Proyecto-Franco-Gelmetti/Output.xlsx', index = False) # Archivo final
