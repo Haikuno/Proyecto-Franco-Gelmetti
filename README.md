@@ -2,11 +2,8 @@
 
 Python > 3.0
 
-  * pandas
-
-  * openpyxl
-
-  * pygame
+* pandas
+* openpyxl
 
 Para instalar las dependencias de python, usá el comando pip install {dependencia}
 ej : pip install pandas

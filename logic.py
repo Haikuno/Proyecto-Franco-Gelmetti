@@ -23,12 +23,15 @@ class Modulo():
     categoria = None
 
 
-def computar():
+def computar(archivo):
+
+    if archivo is None:
+        return
 
     directorio = os.getcwd()
 
     # Guardar en DataFrame el input de productos
-    df_productos = pd.read_excel(directorio + r'/listagordo.xlsx')
+    df_productos = pd.read_excel(archivo)
     df_productos = df_productos.sort_values(
         ["Demanda"], ascending=False)  # Sortear por demanda por las dudas
 
@@ -47,7 +50,7 @@ def computar():
             Producto(row.Nombre, row.Categoría, row.Automatizable))
 
     for row in df_lista.itertuples():
-        if str(row.Ubicación).startswith('A'):
+        if str(row.Ubicación).startswith('A'): # Automatizable
             ubicaciones.append(Ubicacion(row.Ubicación, row.Módulo, True))
         else:
             ubicaciones.append(Ubicacion(row.Ubicación, row.Módulo, False))
