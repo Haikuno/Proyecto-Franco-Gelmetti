@@ -16,7 +16,7 @@ def openFile():
 window = Tk()
 window.geometry("200x100")
 
-abrir = Button(text="  Abrir  ",command=openFile)
+abrir = Button(text="   Abrir   ",command=openFile)
 abrir.pack(side=LEFT, padx=10)
 
 computar = Button(text="Computar", command=lambda: logic.computar(archivo))
