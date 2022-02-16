@@ -1,4 +1,6 @@
 import pandas as pd
+import os
+
 
 class Producto():
     def __init__(self, nombre, categoria, automatizable):
@@ -7,32 +9,42 @@ class Producto():
         self.automatizable = automatizable
     ubicacion = None
 
+
 class Ubicacion():
     def __init__(self, id, modulo, automatizable):
         self.id = id
         self.modulo = modulo
         self.automatizable = automatizable
+
+
 class Modulo():
     def __init__(self, id):
         self.id = id
     categoria = None
 
+
 def computar():
 
-    df_productos = pd.read_excel('listagordo.xlsx') # Guardar en DataFrame el input de productos
-    df_productos = df_productos.sort_values(["Demanda"], ascending=False) # Sortear por demanda por las dudas
+    directorio = os.getcwd()
 
-    df_lista = pd.read_excel('listaprio.xlsx') # Lista de ubicaciones
+    # Guardar en DataFrame el input de productos
+    df_productos = pd.read_excel(directorio + r'/listagordo.xlsx')
+    df_productos = df_productos.sort_values(
+        ["Demanda"], ascending=False)  # Sortear por demanda por las dudas
+
+    # Lista de ubicaciones
+    df_lista = pd.read_excel(directorio + r'/listaprio.xlsx')
     df_lista = df_lista.sort_values(["Prioridad"], ascending=True)
 
     productos = []
     ubicaciones = []
     modulos = []
-    modulos_ocupados = [] # ID
+    modulos_ocupados = []  # ID
     output = []
 
     for row in df_productos.itertuples():
-        productos.append(Producto(row.Nombre, row.Categoría, row.Automatizable))
+        productos.append(
+            Producto(row.Nombre, row.Categoría, row.Automatizable))
 
     for row in df_lista.itertuples():
         if str(row.Ubicación).startswith('A'):
@@ -69,13 +81,11 @@ def computar():
             'Nombre': producto.nombre,
             'Ubicación': producto.ubicacion,
             'Categoria': producto.categoria,
-            'Automatizable' : producto.automatizable,
-            })
+            'Automatizable': producto.automatizable,
+        })
 
     #--------------------------------------------------------------------------------#
 
     output = pd.DataFrame(output)
 
-    #TODO:cambiar pathing dependiendo de pc
-
-    output.to_excel(r'/home/agu/Code/gelme/Proyecto-Franco-Gelmetti/Output.xlsx', index = False) # Archivo final
+    output.to_excel(directorio + r'/Output.xlsx', index=False)  # Archivo final

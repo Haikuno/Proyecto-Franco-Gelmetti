@@ -1,8 +1,9 @@
 import pygame
-import sys
 from pygame.locals import *
+import sys
 import logic
 import button
+import os
 
 # Inicializar pygame
 pygame.init()
@@ -21,24 +22,28 @@ pygame.display.set_caption('Categorizador')
 NEGRO = (0, 0, 0)
 BLANCO = (255, 255, 255)
 
-#load button images
-start_img = pygame.image.load('start_btn.png').convert_alpha()
-exit_img = pygame.image.load('exit_btn.png').convert_alpha()
+# Cargar íconos
+directorio = os.getcwd()
+start_img = pygame.image.load(
+    directorio + r'/iconos/start_btn.png').convert_alpha()
+exit_img = pygame.image.load(
+    directorio + r'/iconos/exit_btn.png').convert_alpha()
 
-#create button instances
-start_button = button.Button(100, 200, start_img, 0.8) # X, Y, Imagen, Escala
-exit_button = button.Button(450, 200, exit_img, 0.8) # X, Y, Imagen, Escala
+# Crear botones
+start_button = button.Button(100, 200, start_img, 0.8)  # X, Y, Imagen, Escala
+exit_button = button.Button(450, 200, exit_img, 0.8)  # X, Y, Imagen, Escala
 
 while True:
-    # Events
+    # Eventos
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
 
-    # Draw
+    # Dibujar
     windowSurface.fill(BLANCO)
     if start_button.draw(windowSurface):
+        print("COMPUTANDO JEJE XD")
         logic.computar()
     if exit_button.draw(windowSurface):
         pygame.quit()
