@@ -50,7 +50,7 @@ def computar(archivo):
             Producto(row.Nombre, row.Categoría, row.Automatizable))
 
     for row in df_lista.itertuples():
-        if str(row.Ubicación).startswith('A'): # Automatizable
+        if str(row.Ubicación).startswith('A'):  # Automatizable
             ubicaciones.append(Ubicacion(row.Ubicación, row.Módulo, True))
         else:
             ubicaciones.append(Ubicacion(row.Ubicación, row.Módulo, False))

@@ -14,8 +14,12 @@ def openFile():
                                             ("todos los archivos","*.*")))
 
 window = Tk()
-abrir = Button(text="Abrir",command=openFile)
-abrir.pack()
+window.geometry("200x100")
+
+abrir = Button(text="  Abrir  ",command=openFile)
+abrir.pack(side=LEFT, padx=10)
+
 computar = Button(text="Computar", command=lambda: logic.computar(archivo))
-computar.pack()
+computar.pack(side=RIGHT, padx=10)
+
 window.mainloop()
