@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from listaprio import *
 
 
 class Producto():
@@ -35,10 +36,6 @@ def computar(archivo):
     df_productos = df_productos.sort_values(
         ["Demanda"], ascending=False)  # Sortear por demanda por las dudas
 
-    # Lista de ubicaciones
-    df_lista = pd.read_excel(directorio + r'/listaprio.xlsx')
-    df_lista = df_lista.sort_values(["Prioridad"], ascending=True)
-
     productos = []
     ubicaciones = []
     modulos = []
@@ -49,13 +46,13 @@ def computar(archivo):
         productos.append(
             Producto(row.Nombre, row.Categoría, row.Automatizable))
 
-    for row in df_lista.itertuples():
-        if str(row.Ubicación).startswith('A'):  # Automatizable
-            ubicaciones.append(Ubicacion(row.Ubicación, row.Módulo, True))
+    for ubicacion in listaprio:
+        if str(ubicacion["Ubicación"]).startswith('A'):  # Automatizable
+            ubicaciones.append(Ubicacion(ubicacion["Ubicación"], ubicacion["Módulo"], True))
         else:
-            ubicaciones.append(Ubicacion(row.Ubicación, row.Módulo, False))
+            ubicaciones.append(Ubicacion(ubicacion["Ubicación"], ubicacion["Módulo"], False))
 
-        modulo = Modulo(row.Módulo)
+        modulo = Modulo(ubicacion["Módulo"])
         if len(modulos) == 0:
             modulos.append(modulo)
 
