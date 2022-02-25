@@ -11,3 +11,6 @@ ej : pip install pandas
 Si tu versión de Python es inferior a 3.4, es posible que no tengas pip instalado.
 En ese caso, actualizá Python o seguí esta guía:
 https://www.geeksforgeeks.org/how-to-install-pip-on-windows/
+
+Para compilar el programa a un ejecutable, instalá pyinstaller (con pip) y ejecutá:
+pyinstaller -F --noconsole main.py
