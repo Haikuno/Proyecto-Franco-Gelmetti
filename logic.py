@@ -110,7 +110,7 @@ def computar(archivo):
                 'Ubicación': ubicacion.id,
                 'Nombre': categoria.productos.pop(0).nombre,
                 'Demanda': categoria.demandas_output.pop(0),
-                'Categoría': categoria.nombre,
+                'Categoría': producto.categoria,
                 'Automatizable': ubicacion.automatizable,
             })
 
