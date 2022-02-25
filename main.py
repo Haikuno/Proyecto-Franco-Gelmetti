@@ -11,7 +11,7 @@ def openFile():
     archivo = filedialog.askopenfilename(   initialdir=directorio,
                                             title="Abrir archivo",
                                             filetypes= (("excel","*.xlsx"),
-                                            ("todos los archivos","*.*")))
+                                            ))
 
 window = Tk()
 window.geometry("200x100")
